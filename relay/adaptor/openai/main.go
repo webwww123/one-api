@@ -106,8 +106,14 @@ func Handler(c *gin.Context, resp *http.Response, promptTokens int, modelName st
 	if err != nil {
 		return ErrorWrapper(err, "close_response_body_failed", http.StatusInternalServerError), nil
 	}
+	
+	// 添加调试日志，记录原始响应内容
+	rawResponse := string(responseBody)
+	logger.SysLog(c.Request.Context(), "Raw response from server: "+rawResponse)
+	
 	err = json.Unmarshal(responseBody, &textResponse)
 	if err != nil {
+		logger.SysError("JSON unmarshaling error when parsing: "+rawResponse)
 		return ErrorWrapper(err, "unmarshal_response_body_failed", http.StatusInternalServerError), nil
 	}
 	if textResponse.Error.Type != "" {
